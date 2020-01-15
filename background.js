@@ -1,3 +1,4 @@
+/*
 chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({enable: true}, function() {
       console.log("Enable functionality is on");
@@ -11,3 +12,4 @@ chrome.runtime.onInstalled.addListener(function() {
     }]);
   });
 
+*/
