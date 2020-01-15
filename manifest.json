@@ -4,10 +4,8 @@
     "description": "Accepts the Eula and Continues",
     "version": "1",
     "author": "me",
-
-    "page_action": {
-      "default_popup": "options.html"
-    },
+    "options_page": "options.html",
+ 
     "content_scripts": [
       {
         "matches": ["https://store.steampowered.com/account/*"],
