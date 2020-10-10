@@ -1,18 +1,25 @@
- 
+var log = function(msg){ console.log(msg); }  
 
 var addListeners=function(tab){
  console.log(tab);
     checkBox();
     hitButton();
-    closeTab(tab);
+    setTimeout(() => {  
+        console.log("Waiting...!");
+        if(completed() === false) return;
+        chrome.tabs.getCurrent(function (tab){ closeTab(tab)}); 
+ }, 1000);
+ 
 } 
 var completed = function(){
-    var error = $("#error_display");
-    var done = $("#receipt_form");
-    done.val === "..." //not done
-    if(done != undefined){
-
-    }
+    var error = $("#error_display").html(); 
+    var done = $("#receipt_form").html();
+    log("done val:" + done);
+    log("error val:" + error);
+    return (error === '...') ;
+    //done.val() === "..." //not done
+  
+    
 }
 var checkBox = function(){
     var ssaInput = $("#accept_ssa");//.checked=true;
@@ -33,9 +40,7 @@ var removeListeners = function(){
     log("removeListener");
 } 
 
-var log = function(msg){
-    console.log(msg);
-} 
+
 
 //message listener for background
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse)    
