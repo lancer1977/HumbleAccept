@@ -1,12 +1,13 @@
 
 
 var log = function(response){console.log(response.result)};
-var enableAuto = document.getElementById('enableauto');
-var enableContinue = document.getElementById('enablecontinue');
-var enableDismiss = document.getElementById('enabledismiss');
+var enableAuto = document.getElementById('enableAuto');
+var enableContinue = document.getElementById('enableContinue');
+var enableDismiss = document.getElementById('enableDismiss');
+
 //on init update the UI checkbox based on storage
-chrome.storage.sync.get('enabled', function(data) {
-  enableAuto.checked=data.enabled;
+chrome.storage.sync.get('enableAuto', function(data) {
+  enableAuto.checked=data.enableAuto;
 });
 
 chrome.storage.sync.get('enableContinue', function(data) {
@@ -25,6 +26,7 @@ enableAuto.onchange = function(element) {
     console.log('The value is'+ value);
   });
 
+  log("EnableAuto:" + value);
   //Pass init or remove message to content script 
   if(value){
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {

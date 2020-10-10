@@ -5,7 +5,11 @@
     "version": "1",
     "author": "me",
     "options_page": "options.html",
- 
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+
     "content_scripts": [
       {
         "matches": ["https://store.steampowered.com/account/*"],
