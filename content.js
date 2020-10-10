@@ -6,18 +6,24 @@ var addListeners=function(tab){
     hitButton();
     setTimeout(() => {  
         console.log("Waiting...!");
-        if(completed() === false) return;
-        chrome.tabs.getCurrent(function (tab){ closeTab(tab)}); 
+        if(completed() === false) return; 
+        chrome.runtime.sendMessage({closeRequest: "close"}, function(response) {
+            console.log('closerequest:' + response);
+          });
+  
  }, 1000);
  
 } 
 var completed = function(){
     var error = $("#error_display").html(); 
     var done = $("#receipt_form").html();
+    var doneStyle = $("#receipt_form").css("display");
+    log(doneStyle);
+    var doneHidden = doneStyle ==  "none" ;
     log("done val:" + done);
     log("error val:" + error);
-    return (error === '...') ;
-    //done.val() === "..." //not done
+    log("done hidden:" + doneHidden);
+    return doneHidden == false; 
   
     
 }
@@ -29,12 +35,7 @@ var hitButton = function(){
     $('#register_btn')[0].click(); 
 }
 
-var closeTab = function(tab)
-{
-    console.log("close tab start");
-    chrome.runtime.tabs.remove(tab.id);
-    console.log("done in close tab");
-}
+
  
 var removeListeners = function(){
     log("removeListener");
@@ -62,7 +63,7 @@ window.onload=function(){
     chrome.storage.sync.get('enableAuto', function(data) {
         log(data);
         log(data.enableAuto);
-        if(data.enableAuto)
+        if('enableAuto' + data.enableAuto)
         {
             addListeners();
         }

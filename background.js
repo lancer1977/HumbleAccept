@@ -23,3 +23,28 @@
       }]);
     });
   });
+ 
+
+  chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      console.log(sender.tab ?
+                  "from a content script:" + sender.tab.url :
+                  "from the extension");
+                  log(request.closeRequest);
+      if (request.closeRequest == "close"){
+        sendResponse({farewell: "goodbye"});
+        log('close request');
+        chrome.tabs.getSelected(null, function (tab){ closeTab(tab)});  
+      }
+      else{
+        sendResponse({error: "not the droids you were looking for"});
+      }
+       
+    });
+
+    var closeTab = function(tab)
+{
+    console.log("close tab start" +  tab.id);
+    chrome.tabs.remove(tab.id);
+    console.log("done in close tab");
+}
