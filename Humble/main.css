@@ -1,0 +1,19 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+}
+
+label {
+  display: block;
+  margin: 10px 0;
+}
+
+button {
+  padding: 6px 12px;
+  margin-top: 10px;
+}
+
+#status {
+  color: green;
+  margin-top: 10px;
+}

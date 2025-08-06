@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Humble Extractorr",
+  "description": "Adds interactions to the humble bundle",
+  "version": "2.0.0",
+"permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://www.humblebundle.com/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+  "https://www.humblebundle.com/downloads*",
+  "https://www.humblebundle.com/home/keys*"
+],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_title": "Steam Key Manager"
+  }
+}

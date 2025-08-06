@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Steam Key Manager Settings</title>
+    <link rel="stylesheet" href="main.css" />
+  </head>
+  <body>
+    <h1>Steam Key Manager Settings</h1>
+    <form id="settingsForm">
+      <label>
+        <input type="checkbox" id="enableAuto" />
+        Enable Auto Registration
+      </label>
+
+      <label>
+        API Endpoint:
+        <input
+          type="url"
+          id="apiEndpoint"
+          placeholder="https://example.com/api/endpoint"
+        />
+      </label>
+
+      <label>
+        API Key:
+        <input type="text" id="apiKey" placeholder="Your API key" />
+      </label>
+
+      <label>
+        <input type="checkbox" id="closeTab" />
+        Close tab after completion
+      </label>
+
+      <button type="submit">Save</button>
+    </form>
+    <p id="status"></p>
+    <script src="options.js"></script>
+  </body>
+</html>
