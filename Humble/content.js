@@ -45,18 +45,40 @@ function createKeyTable(keys) {
 
   const headerRow = document.createElement('tr');
   headerRow.innerHTML = `
-    <th style="text-align:left; border-bottom:1px solid #ccc;">Game</th>
     <th style="text-align:left; border-bottom:1px solid #ccc;">Key</th>
+    <th style="text-align:left; border-bottom:1px solid #ccc;">Game</th>
+    <th style="text-align:left; border-bottom:1px solid #ccc;">Action</th>
   `;
   table.appendChild(headerRow);
 
   keys.forEach(({ title, key }) => {
     const row = document.createElement('tr');
-    row.innerHTML = `
-      <td style="padding: 4px 8px; font-family: monospace;">${key},</td>
-      <td style="padding: 4px 8px; vertical-align:top;">${title}</td>
-      
-    `;
+    const keyCell = document.createElement('td');
+    keyCell.style = 'padding: 4px 8px; font-family: monospace;';
+    keyCell.textContent = key;
+
+    const titleCell = document.createElement('td');
+    titleCell.style = 'padding: 4px 8px; vertical-align: top;';
+    titleCell.textContent = title;
+
+    const actionCell = document.createElement('td');
+    actionCell.style = 'padding: 4px 8px; vertical-align: top;';
+
+    const redeemButton = document.createElement('button');
+    redeemButton.textContent = 'Redeem';
+    redeemButton.style =
+      'padding: 4px 8px; background:#1b2838; color:#c7d5e0; border:1px solid #66c0f4; border-radius:3px; cursor:pointer;';
+    redeemButton.onclick = () => {
+      const redeemUrl = `https://store.steampowered.com/account/registerkey?key=${encodeURIComponent(
+        key
+      )}`;
+      window.open(redeemUrl, '_blank');
+    };
+
+    actionCell.appendChild(redeemButton);
+    row.appendChild(keyCell);
+    row.appendChild(titleCell);
+    row.appendChild(actionCell);
     table.appendChild(row);
   });
 
