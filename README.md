@@ -1,6 +1,15 @@
 # HumbleAccept
 A project focused on HumbleAccept.
 
+## Tags
+
+- humble-accept
+- docs
+- humble
+- accept
+- ui
+- mod
+
 ## Overview
 This repository contains the HumbleAccept project. It is designed to provide robust functionality and seamless integration within its ecosystem.
 
