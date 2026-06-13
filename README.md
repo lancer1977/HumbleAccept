@@ -27,8 +27,10 @@ This repository contains the HumbleAccept project. It is designed to provide rob
 
 ## 📖 Documentation
 Detailed documentation can be found in the following sections:
+- [Docs README](./docs/README.md)
 - [Feature Index](./docs/features/README.md)
 - [Core Capabilities](./docs/features/core-capabilities.md)
+- [Roadmap Index](./docs/roadmaps/README.md)
 
 ## 🚦 Getting Started
 Check project files for build and run instructions.
