@@ -1,22 +1,31 @@
 {
-    "manifest_version": 2,
-    "name": "AcceptEula",
-    "description": "Accepts the Eula and Continues",
-    "version": "1",
-    "author": "me",
-    "options_page": "options.html",
-    "background": {
-      "scripts": ["background.js"],
-      "persistent": false
-    },
-
-    "content_scripts": [
-      {
-        "matches": ["https://store.steampowered.com/account/*"],
-        "js": ["jquery-3.3.1.js","content.js"],
-        "css": ["main.css"]
-      }
-    ],
-
-    "permissions": ["storage","activeTab","declarativeContent","tabs"]
+  "manifest_version": 3,
+  "name": "AcceptEula",
+  "description": "Accepts the EULA, continues redemption, and preserves duplicate keys",
+  "version": "1.2.0",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["https://store.steampowered.com/*", "<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://store.steampowered.com/account/registerkey*"],
+      "js": ["jquery-3.3.1.js", "content.js"],
+      "css": ["main.css"]
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_title": "Steam Key Manager"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["steam-bridge.js"],
+      "matches": ["https://store.steampowered.com/*"]
+    }
+  ]
 }

@@ -1,44 +1,175 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const enableAuto = document.getElementById("enableAuto");
+  const enableContinue = document.getElementById("enableContinue");
+  const enableDismiss = document.getElementById("enableDismiss");
+  const notifyOnDuplicate = document.getElementById("notifyOnDuplicate");
+  const notifyEndpoint = document.getElementById("notifyEndpoint");
+  const notifyApiKey = document.getElementById("notifyApiKey");
+  const status = document.getElementById("status");
+  const queueStatus = document.getElementById("queueStatus");
+  const queueList = document.getElementById("queueList");
+  const refreshQueue = document.getElementById("refreshQueue");
+  const retryAllQueue = document.getElementById("retryAllQueue");
+  const clearQueue = document.getElementById("clearQueue");
 
+  function showStatus(message, tone = "default") {
+    status.textContent = message;
+    status.style.color = tone === "error" ? "#8c1c13" : tone === "success" ? "#135e28" : "#222";
+  }
 
-var log = function(response){console.log(response)};
-var enableAuto = document.getElementById('enableAuto');
-var enableContinue = document.getElementById('enableContinue');
-var enableDismiss = document.getElementById('enableDismiss');
+  function saveSync(keys) {
+    chrome.storage.sync.set(keys);
+  }
 
-//LOAD Values
-chrome.storage.sync.get('enableAuto', function(data) {
-  enableAuto.checked=data.enableAuto;
-});
+  function renderQueue(queue) {
+    queueList.innerHTML = "";
 
-chrome.storage.sync.get('enableContinue', function(data) {
-  enableContinue.checked=data.enableContinue;
-});
+    if (!queue || queue.length === 0) {
+      queueStatus.textContent = "Queue is empty.";
+      return;
+    }
 
-chrome.storage.sync.get('enableDismiss', function(data) {
-  enableDismiss.checked=data.enableDismiss;
-});
+    queueStatus.textContent = `${queue.length} queued duplicate key(s).`;
 
-//ATTACH Readers
-enableDismiss.onchange = function(element) { chrome.storage.sync.set({'enableDismiss': this.checked});};
-enableContinue.onchange = function(element) { chrome.storage.sync.set({'enableContinue': this.checked});};  
-enableAuto.onchange = function(element) {
-  let value = this.checked;
+    queue.forEach((entry, index) => {
+      const payload = entry && entry.payload ? entry.payload : entry;
+      const item = document.createElement("div");
+      item.className = "queue-item";
 
-  //update the extension storage value
-  chrome.storage.sync.set({'enableAuto': value}, function() {
-    log('enableAuto is'+ value);
-  });
+      const title = document.createElement("div");
+      title.innerHTML = `<strong>${payload.key || "(unknown key)"}</strong>`;
 
-  log("EnableAuto:" + value);
-  //Pass init or remove message to content script 
-  if(value){
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {command: "init", enabled: value},log);
-    });
-  }else{
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {command: "remove", enabled: value},log);
+      const meta = document.createElement("div");
+      meta.className = "muted";
+      meta.textContent = `${payload.detectedAt || "unknown time"} | ${payload.pageUrl || ""}`;
+
+      const message = document.createElement("pre");
+      message.textContent = JSON.stringify(payload, null, 2);
+
+      const retryButton = document.createElement("button");
+      retryButton.type = "button";
+      retryButton.textContent = "Retry";
+      retryButton.onclick = () => {
+        chrome.runtime.sendMessage({ type: "retryDuplicateQueue", entry }, (response) => {
+          if (!response || response.ok === false) {
+            showStatus(response?.error || "Retry failed.", "error");
+            return;
+          }
+
+          showStatus("Queued key retried.", "success");
+          loadQueue();
+        });
+      };
+
+      item.appendChild(title);
+      item.appendChild(meta);
+      item.appendChild(message);
+      item.appendChild(retryButton);
+      queueList.appendChild(item);
     });
   }
 
-};
+  function loadQueue() {
+    chrome.runtime.sendMessage({ type: "getDuplicateQueue" }, (response) => {
+      if (!response || response.ok === false) {
+        queueStatus.textContent = response?.error || "Unable to load queue.";
+        renderQueue([]);
+        return;
+      }
+
+      renderQueue(response.queue || []);
+    });
+  }
+
+  chrome.storage.sync.get(
+    [
+      "enableAuto",
+      "enableContinue",
+      "enableDismiss",
+      "notifyOnDuplicate",
+      "notifyEndpoint",
+      "notifyApiKey"
+    ],
+    (data) => {
+      enableAuto.checked = data.enableAuto !== false;
+      enableContinue.checked = data.enableContinue !== false;
+      enableDismiss.checked = data.enableDismiss !== false;
+      notifyOnDuplicate.checked = data.notifyOnDuplicate !== false;
+      notifyEndpoint.value = data.notifyEndpoint || "";
+      notifyApiKey.value = data.notifyApiKey || "";
+    }
+  );
+
+  enableAuto.onchange = function () {
+    saveSync({ enableAuto: this.checked });
+  };
+
+  enableContinue.onchange = function () {
+    saveSync({ enableContinue: this.checked });
+  };
+
+  enableDismiss.onchange = function () {
+    saveSync({ enableDismiss: this.checked });
+  };
+
+  notifyOnDuplicate.onchange = function () {
+    saveSync({ notifyOnDuplicate: this.checked });
+  };
+
+  notifyEndpoint.onchange = function () {
+    saveSync({ notifyEndpoint: this.value.trim() });
+  };
+
+  notifyApiKey.onchange = function () {
+    saveSync({ notifyApiKey: this.value.trim() });
+  };
+
+  refreshQueue.onclick = loadQueue;
+
+  retryAllQueue.onclick = () => {
+    chrome.runtime.sendMessage({ type: "getDuplicateQueue" }, (response) => {
+      if (!response || response.ok === false) {
+        showStatus(response?.error || "Unable to load queue.", "error");
+        return;
+      }
+
+      const queue = response.queue || [];
+      if (queue.length === 0) {
+        showStatus("Queue is empty.", "default");
+        return;
+      }
+
+      let index = 0;
+      const next = () => {
+        if (index >= queue.length) {
+          showStatus("Finished retrying queued keys.", "success");
+          loadQueue();
+          return;
+        }
+
+        chrome.runtime.sendMessage({ type: "retryDuplicateQueue", entry: queue[index++] }, (result) => {
+          if (!result || result.ok === false) {
+            showStatus(result?.error || "Retry failed.", "error");
+          }
+          next();
+        });
+      };
+
+      next();
+    });
+  };
+
+  clearQueue.onclick = () => {
+    chrome.runtime.sendMessage({ type: "clearDuplicateQueue" }, (response) => {
+      if (!response || response.ok === false) {
+        showStatus(response?.error || "Unable to clear queue.", "error");
+        return;
+      }
+
+      showStatus("Queue cleared.", "success");
+      loadQueue();
+    });
+  };
+
+  loadQueue();
+});

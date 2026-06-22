@@ -1,50 +1,245 @@
+const DEFAULT_SETTINGS = {
+  enableAuto: true,
+  enableContinue: true,
+  enableDismiss: true,
+  notifyOnDuplicate: true,
+  notifyEndpoint: "",
+  notifyApiKey: ""
+};
 
-  var log = function(response){console.log(response)};
-  chrome.runtime.onInstalled.addListener(function() 
-  {
-    chrome.storage.sync.set({enable: true}, function() 
-    {
-      log('The color is green.');
-      log("Enable functionality is on");
-      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        log("Sending MEsage");
-        chrome.tabs.sendMessage(tabs[0].id, {command: "init", enabledAuto: true});
-      });
-    });
-    chrome.declarativeContent.onPageChanged.removeRules(undefined, function() 
-    {
-      chrome.declarativeContent.onPageChanged.addRules([{
-        conditions: [new chrome.declarativeContent.PageStateMatcher
-          (
-          {pageUrl: {hostEquals: 'store.steampowered.com/account/registerkey'} }
-          )
-        ],
-            actions: [new chrome.declarativeContent.ShowPageAction()]
-      }]);
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.storage.sync.set(DEFAULT_SETTINGS);
+});
+
+function getSyncSettings(keys) {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(keys, resolve);
+  });
+}
+
+function getQueue() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get({ duplicateQueue: [] }, (items) => {
+      resolve(items.duplicateQueue || []);
     });
   });
- 
-
-  chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      console.log(sender.tab ?
-                  "from a content script:" + sender.tab.url :
-                  "from the extension");
-                  log(request.closeRequest);
-      if (request.closeRequest == "close"){
-        sendResponse({farewell: "goodbye"});
-        log('close request');
-        chrome.tabs.getSelected(null, function (tab){ closeTab(tab)});  
-      }
-      else{
-        sendResponse({error: "not the droids you were looking for"});
-      }
-       
-    });
-
-    var closeTab = function(tab)
-{
-    console.log("close tab start" +  tab.id);
-    chrome.tabs.remove(tab.id);
-    console.log("done in close tab");
 }
+
+function setQueue(queue) {
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ duplicateQueue: queue }, resolve);
+  });
+}
+
+function getQueueSnapshot() {
+  return getQueue();
+}
+
+function clearQueue() {
+  return setQueue([]);
+}
+
+async function queueDuplicate(payload) {
+  const queue = await getQueue();
+  queue.push(payload);
+  await setQueue(queue);
+  return { queued: true, queueLength: queue.length };
+}
+
+async function notifyDuplicate(payload) {
+  const settings = await getSyncSettings([
+    "notifyOnDuplicate",
+    "notifyEndpoint",
+    "notifyApiKey"
+  ]);
+
+  if (settings.notifyOnDuplicate === false) {
+    return queueDuplicate(payload);
+  }
+
+  const endpoint = (settings.notifyEndpoint || "").trim();
+
+  if (!endpoint) {
+    return queueDuplicate(payload);
+  }
+
+  const headers = {
+    "Content-Type": "application/json"
+  };
+
+  if (settings.notifyApiKey) {
+    headers.Authorization = `Bearer ${settings.notifyApiKey}`;
+  }
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    return queueDuplicate(payload);
+  }
+
+  return { queued: false, sent: true };
+}
+
+async function retryQueuedDuplicate(entry) {
+  const payload = entry && entry.payload ? entry.payload : entry;
+  if (!payload) {
+    return { ok: false, error: "Missing queued payload" };
+  }
+
+  const result = await notifyDuplicate(payload);
+  if (result.sent) {
+    const queue = await getQueue();
+    const signature = JSON.stringify(payload);
+    const filtered = queue.filter((item) => JSON.stringify(item.payload || item) !== signature);
+    await setQueue(filtered);
+  }
+
+  return result;
+}
+
+async function queueEvent(payload) {
+  const queue = await getQueue();
+  queue.push(payload);
+  await setQueue(queue);
+  return { queued: true, queueLength: queue.length };
+}
+
+async function notifyEvent(payload) {
+  const settings = await getSyncSettings([
+    "notifyOnDuplicate",
+    "notifyEndpoint",
+    "notifyApiKey"
+  ]);
+
+  if (settings.notifyOnDuplicate === false) {
+    return queueEvent(payload);
+  }
+
+  const endpoint = (settings.notifyEndpoint || "").trim();
+
+  if (!endpoint) {
+    return queueEvent(payload);
+  }
+
+  const headers = {
+    "Content-Type": "application/json"
+  };
+
+  if (settings.notifyApiKey) {
+    headers.Authorization = `Bearer ${settings.notifyApiKey}`;
+  }
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    return queueEvent(payload);
+  }
+
+  return { queued: false, sent: true };
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request && request.closeRequest === "close") {
+    const tabId = sender && sender.tab ? sender.tab.id : null;
+
+    if (typeof tabId === "number") {
+      chrome.tabs.remove(tabId, () => {
+        sendResponse({ farewell: "goodbye" });
+      });
+      return true;
+    }
+  }
+
+  if (request && request.type === "duplicateKey") {
+    const payload = {
+      source: "SteamAccept",
+      kind: "duplicate",
+      key: request.key || "",
+      pageUrl: request.pageUrl || "",
+      message: request.message || "already owned",
+      detectedAt: new Date().toISOString()
+    };
+
+    notifyDuplicate(payload)
+      .then((result) => {
+        sendResponse({ ok: true, ...result });
+      })
+      .catch((error) => {
+        queueDuplicate(payload).then((result) => {
+          sendResponse({ ok: false, error: error.message, ...result });
+        });
+      });
+
+    return true;
+  }
+
+  if (request && request.type === "rateLimitedKey") {
+    const payload = {
+      source: "SteamAccept",
+      kind: "rate_limited",
+      key: request.key || "",
+      pageUrl: request.pageUrl || "",
+      message: request.message || "too many recent activation attempts",
+      detectedAt: new Date().toISOString()
+    };
+
+    notifyEvent(payload)
+      .then((result) => {
+        sendResponse({ ok: true, ...result });
+      })
+      .catch((error) => {
+        queueEvent(payload).then((result) => {
+          sendResponse({ ok: false, error: error.message, ...result });
+        });
+      });
+
+    return true;
+  }
+
+  if (request && request.type === "getDuplicateQueue") {
+    getQueueSnapshot()
+      .then((queue) => {
+        sendResponse({ ok: true, queue });
+      })
+      .catch((error) => {
+        sendResponse({ ok: false, error: error.message, queue: [] });
+      });
+
+    return true;
+  }
+
+  if (request && request.type === "retryDuplicateQueue") {
+    retryQueuedDuplicate(request.entry)
+      .then((result) => {
+        sendResponse({ ok: true, result });
+      })
+      .catch((error) => {
+        sendResponse({ ok: false, error: error.message });
+      });
+
+    return true;
+  }
+
+  if (request && request.type === "clearDuplicateQueue") {
+    clearQueue()
+      .then(() => {
+        sendResponse({ ok: true });
+      })
+      .catch((error) => {
+        sendResponse({ ok: false, error: error.message });
+      });
+
+    return true;
+  }
+
+  sendResponse({ error: "not the droids you were looking for" });
+  return false;
+});

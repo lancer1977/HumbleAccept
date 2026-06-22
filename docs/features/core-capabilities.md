@@ -12,10 +12,11 @@ tags: [documentation, HumbleAccept, core]
 # Core Capabilities
 
 ## Summary
-HumbleAccept provides foundational capabilities that extend beyond its primary user interface.
+HumbleAccept provides browser automation for redeeming Steam keys and exporting Humble Bundle keys into downstream storage.
 
 ## Value Provided
-- Enables automation within the HumbleAccept domain.
+- Reduces manual key redemption work.
+- Preserves a configurable export path for downstream tooling such as `channel-cheevos`.
 - Provides shared logic and utilities.
 - Defines the normalized Humble key import contract for channel-cheevos ingestion.
 

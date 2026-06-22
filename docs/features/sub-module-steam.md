@@ -11,4 +11,4 @@ tags: [feature, HumbleAccept, existing]
 
 # Sub-module: Steam
 
-Existing implementation of Sub-module: Steam within the HumbleAccept codebase.
+Steam key redemption automation that fills the key field, accepts the agreement checkbox, dismisses modal flow interruptions, closes the tab after success, and preserves owned or already-consumed keys through clipboard copy, notification, queueing, and a resend UI.

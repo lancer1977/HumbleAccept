@@ -1,5 +1,5 @@
 # HumbleAccept
-A project focused on HumbleAccept.
+A browser extension set for Humble Bundle and Steam key handling.
 
 ## Tags
 
@@ -11,19 +11,19 @@ A project focused on HumbleAccept.
 - mod
 
 ## Overview
-This repository contains the HumbleAccept project. It is designed to provide robust functionality and seamless integration within its ecosystem.
+This repository contains two related browser extensions:
+- Steam redemption automation for accepting keys, checking the agreement box, dismissing transient dialogs, and closing successful redemption tabs.
+- Steam duplicate-key detection with webhook or relay notification so owned or already-consumed keys are preserved, copied, and queued with a resend UI.
+- Humble Bundle key extraction and export to a configurable `channel-cheevos` endpoint.
 
 ## 🚀 Key Features
-- General Purpose Utility
-- Sub Module Humble
-- Core Application Logic
-- Standardized Project Layout
-- Core Capabilities
-- Sub Module Steam
-- [Feature 3 (Beyond the App capability)]
+- Humble Bundle key extraction and export
+- Steam key redemption automation
+- Automatic popup dismissal and tab close handling
+- Configurable publish endpoint and API key
 
 ## 🛠 Technology Stack
-- [Language/Framework determined by project structure]
+- Chrome Extension Manifest V3, vanilla JavaScript, DOM APIs
 
 ## 📖 Documentation
 Detailed documentation can be found in the following sections:

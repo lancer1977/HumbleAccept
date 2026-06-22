@@ -3,31 +3,107 @@
   <head>
     <title>Settings</title>
     <style>
-      body{
-        width: 80px;
-        text-align: center;
+      body {
+        width: 420px;
+        font-family: sans-serif;
+        padding: 16px;
       }
-      input {
-        height: 20px;
-        width: 50px;
+
+      input[type="text"],
+      input[type="url"] {
+        height: 28px;
+        width: 100%;
         outline: none;
+        box-sizing: border-box;
+        margin: 4px 0 12px;
       }
-      label{
-        width:50px;
+
+      input[type="checkbox"] {
+        margin-right: 8px;
+      }
+
+      label {
+        display: block;
         font-weight: bold;
+        margin-top: 8px;
+      }
+
+      p {
+        margin-top: 8px;
+        color: #444;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      button {
+        margin: 4px 8px 4px 0;
+        padding: 6px 10px;
+      }
+
+      .queue-item {
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px;
+        margin: 8px 0;
+        background: #fafafa;
+      }
+
+      .queue-item pre {
+        margin: 6px 0 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 12px;
+      }
+
+      .row {
+        margin: 10px 0;
+      }
+
+      .muted {
+        color: #666;
+        font-size: 12px;
+      }
+
+      #status {
+        margin-top: 12px;
+        font-size: 13px;
       }
     </style>
   </head>
   <body>
-    <label>Enable Auto Accept</label>
-    <input type="checkbox" id="enableAuto" checked></input>
+    <label for="enableAuto">Enable Auto Accept</label>
+    <input type="checkbox" id="enableAuto" checked />
 
-    <label>Enable Auto Continue</label>
-    <input type="checkbox" id="enableContinue" checked></input>
- 
-    <label>Enable Auto Dismiss</label>
-    <input type="checkbox" id="enableDismiss" checked></input>
+    <label for="enableContinue">Enable Auto Continue</label>
+    <input type="checkbox" id="enableContinue" checked />
 
+    <label for="enableDismiss">Enable Auto Dismiss</label>
+    <input type="checkbox" id="enableDismiss" checked />
+
+    <label for="notifyOnDuplicate">Notify on Duplicate</label>
+    <input type="checkbox" id="notifyOnDuplicate" checked />
+
+    <label for="notifyEndpoint">Notify Endpoint</label>
+    <input type="url" id="notifyEndpoint" placeholder="Discord webhook or mail relay URL" />
+
+    <label for="notifyApiKey">Notify API Key</label>
+    <input type="text" id="notifyApiKey" placeholder="Optional bearer token" />
+
+    <div class="row">
+      <button id="refreshQueue" type="button">Refresh Queue</button>
+      <button id="retryAllQueue" type="button">Retry All</button>
+      <button id="clearQueue" type="button">Clear Queue</button>
+    </div>
+
+    <div id="queueStatus" class="muted">No queue loaded yet.</div>
+    <div id="queueList"></div>
+
+    <p>
+      When Steam says the key is already owned, the extension will send the key to this endpoint.
+      If the endpoint is blank or unavailable, the payload is queued locally so it is not lost.
+    </p>
+
+    <p id="status"></p>
     <script src="options.js"></script>
   </body>
 </html>

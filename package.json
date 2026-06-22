@@ -3,6 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "test": "bash scripts/validate.sh"
+    "test": "bash scripts/validate.sh && node tests/steam-content-smoke-test.mjs && node tests/steam-duplicate-smoke-test.mjs && node tests/steam-rate-limit-smoke-test.mjs"
   }
 }

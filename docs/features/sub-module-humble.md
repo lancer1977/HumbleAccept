@@ -11,4 +11,4 @@ tags: [feature, HumbleAccept, existing]
 
 # Sub-module: Humble
 
-Existing implementation of Sub-module: Humble within the HumbleAccept codebase.
+Humble Bundle key extraction, automatic publishing to a configurable endpoint, and optional tab close handling.
