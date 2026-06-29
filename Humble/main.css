@@ -17,3 +17,26 @@ button {
   color: green;
   margin-top: 10px;
 }
+
+#queueSection {
+  margin-top: 24px;
+  max-width: 720px;
+}
+
+.queue-entry {
+  align-items: center;
+  border: 1px solid #ddd;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: 8px 0;
+  padding: 8px;
+}
+
+.queue-delivered {
+  border-color: #8bc48a;
+}
+
+.queue-failed {
+  border-color: #d98c8c;
+}

@@ -40,6 +40,40 @@ function createKeyTable(keys) {
   closeButton.style = 'float: right; margin-bottom: 10px;';
   closeButton.onclick = () => container.remove();
 
+  const publishButton = document.createElement('button');
+  publishButton.textContent = 'Send to ChannelCheevos';
+  publishButton.style =
+    'float: right; margin-right: 8px; margin-bottom: 10px; padding: 4px 8px;';
+
+  const publishStatus = document.createElement('div');
+  publishStatus.style = 'clear: both; margin-bottom: 8px; color: #333;';
+
+  publishButton.onclick = () => {
+    publishButton.disabled = true;
+    publishStatus.textContent = 'Sending import batch...';
+
+    chrome.runtime.sendMessage(
+      {
+        type: 'publishHumbleKeys',
+        rows: keys,
+        sourceUrl: window.location.href
+      },
+      (response) => {
+        publishButton.disabled = false;
+
+        if (!response || !response.ok) {
+          const queued = response && response.entry && response.entry.status === 'pending';
+          publishStatus.textContent = queued
+            ? `Import queued for retry: ${response.error}`
+            : `Import failed: ${(response && response.error) || 'unknown error'}`;
+          return;
+        }
+
+        publishStatus.textContent = `Delivered ${response.entry.batch.items.length} keys.`;
+      }
+    );
+  };
+
   const table = document.createElement('table');
   table.style = 'width: 100%; border-collapse: collapse;';
 
@@ -83,6 +117,8 @@ function createKeyTable(keys) {
   });
 
   container.appendChild(closeButton);
+  container.appendChild(publishButton);
+  container.appendChild(publishStatus);
   container.appendChild(table);
   document.body.appendChild(container);
 }
