@@ -32,5 +32,11 @@ Detailed documentation can be found in the following sections:
 - [Core Capabilities](./docs/features/core-capabilities.md)
 - [Roadmap Index](./docs/roadmaps/README.md)
 
+## CI/CD
+
+GitHub Actions validates the browser-extension manifests and required source files with `bash scripts/validate.sh` on pushes and pull requests. The workflow packages the `Humble/` and `Steam/` extension folders as zip files and uploads them as the `humbleaccept-browser-extensions` workflow artifact.
+
+No repository secrets are required for the current validation or artifact upload path.
+
 ## 🚦 Getting Started
 Check project files for build and run instructions.
