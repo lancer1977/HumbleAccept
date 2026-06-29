@@ -28,6 +28,7 @@ This repository contains the HumbleAccept project. It is designed to provide rob
 ## 📖 Documentation
 Detailed documentation can be found in the following sections:
 - [Docs README](./docs/README.md)
+- [ChannelCheevos Import Contract](./docs/integrations/channel-cheevos-import.md)
 - [Feature Index](./docs/features/README.md)
 - [Core Capabilities](./docs/features/core-capabilities.md)
 - [Roadmap Index](./docs/roadmaps/README.md)

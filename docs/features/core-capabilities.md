@@ -17,6 +17,10 @@ HumbleAccept provides foundational capabilities that extend beyond its primary u
 ## Value Provided
 - Enables automation within the HumbleAccept domain.
 - Provides shared logic and utilities.
+- Defines the normalized Humble key import contract for channel-cheevos ingestion.
+
+## Integration Contracts
+- [ChannelCheevos Import Contract](../integrations/channel-cheevos-import.md)
 
 
 ## Newly Documented Existing Capabilities

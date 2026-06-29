@@ -6,6 +6,7 @@ Canonical docs entrypoint for HumbleAccept.
 
 - [Repository README](../README.md)
 - [Feature Index](./features/README.md)
+- [ChannelCheevos Import Contract](./integrations/channel-cheevos-import.md)
 - [Roadmap Index](./roadmaps/README.md)
 
 ## Notes
