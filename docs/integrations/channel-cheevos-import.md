@@ -125,7 +125,9 @@ The adapter should return `202 Accepted` for queued imports and `200 OK` for syn
 - Respect `Retry-After` when present.
 - Do not retry `400`, `401`, `403`, or other permanent validation/auth failures.
 - Use the same batch idempotency key on every retry.
-- Durable retry queue implementation remains separate from this contract.
+- Retryable failures are stored in the extension-local durable import queue.
+- Operators can retry pending or failed batches from the Humble extension options page without copying keys between tools.
+- Delivered batches remain visible until cleared from the options page so operators can confirm the final queue state.
 
 ## Extension Wiring Notes
 

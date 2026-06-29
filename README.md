@@ -40,4 +40,6 @@ GitHub Actions validates the browser-extension manifests and required source fil
 No repository secrets are required for the current validation or artifact upload path.
 
 ## 🚦 Getting Started
-Check project files for build and run instructions.
+Run `bash scripts/validate.sh` before packaging the extensions.
+
+For the Humble extension, configure the ChannelCheevos import endpoint and bearer token from the options page. The Humble key popup can send revealed keys directly to that endpoint. Retryable delivery failures are kept in the extension-local import queue until the options-page retry action delivers them.

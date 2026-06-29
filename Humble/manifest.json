@@ -3,7 +3,7 @@
   "name": "Humble Extractorr",
   "description": "Adds interactions to the humble bundle",
   "version": "2.0.0",
-"permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": [
     "https://www.humblebundle.com/*",
     "<all_urls>"
@@ -17,7 +17,7 @@
   "https://www.humblebundle.com/downloads*",
   "https://www.humblebundle.com/home/keys*"
 ],
-      "js": ["content.js"],
+      "js": ["importQueue.js", "content.js"],
       "run_at": "document_idle"
     }
   ],
