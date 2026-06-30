@@ -6,6 +6,7 @@ cd "$ROOT"
 
 node <<'NODE'
 const fs = require("node:fs");
+const assert = require("node:assert/strict");
 
 for (const manifest of ["Humble/manifest.json", "Steam/manifest.json"]) {
   JSON.parse(fs.readFileSync(manifest, "utf8"));
@@ -28,6 +29,7 @@ for (const requiredPath of [
 }
 
 const queue = require("./Humble/importQueue.js");
+const ingestFixture = JSON.parse(fs.readFileSync("docs/integrations/channel-cheevos-ingest-fixture.json", "utf8"));
 
 function createMemoryStorage() {
   const state = {};
@@ -89,7 +91,55 @@ async function runQueueTests() {
   if (summary.delivered !== 1 || summary.pending !== 0) throw new Error("Expected delivered queue summary.");
 }
 
-runQueueTests().catch((error) => {
+async function runChannelCheevosIngestFixtureTest() {
+  const storage = createMemoryStorage();
+  const rows = [
+    { title: " Game One ", key: "aaaaa-bbbbb-ccccc" },
+    { title: "Duplicate", key: "AAAAA-BBBBB-CCCCC" },
+    { title: "", key: "not-imported" }
+  ];
+  const captured = [];
+
+  const result = await queue.publishRows(rows, {
+    storage,
+    sourceUrl: "https://www.humblebundle.com/home/keys#fragment",
+    exportedAt: ingestFixture.request.body.exportedAt,
+    settings: {
+      apiEndpoint: ingestFixture.endpoint,
+      apiKey: "test-operator-token"
+    },
+    fetchImpl: async (url, request) => {
+      captured.push({ url, request });
+      return {
+        ok: true,
+        status: ingestFixture.response.statusCode,
+        text: async () => JSON.stringify(ingestFixture.response.body)
+      };
+    }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(captured.length, 1);
+
+  const { url, request } = captured[0];
+  assert.equal(url, ingestFixture.endpoint);
+  assert.equal(request.method, ingestFixture.request.method);
+  assert.equal(request.headers.Authorization, ingestFixture.request.requiredHeaders.Authorization);
+  assert.equal(request.headers["Content-Type"], ingestFixture.request.requiredHeaders["Content-Type"]);
+  assert.equal(request.headers["Idempotency-Key"], ingestFixture.request.requiredHeaders["Idempotency-Key"]);
+  assert.deepEqual(JSON.parse(request.body), ingestFixture.request.body);
+
+  const stored = await queue.readQueue(storage);
+  assert.equal(stored.length, 1);
+  assert.equal(stored[0].status, "delivered");
+  assert.deepEqual(stored[0].response, ingestFixture.response.body);
+  assert.equal(result.rejected.length, 1);
+}
+
+Promise.all([
+  runQueueTests(),
+  runChannelCheevosIngestFixtureTest()
+]).catch((error) => {
   console.error(error);
   process.exit(1);
 });

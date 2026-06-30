@@ -1,0 +1,38 @@
+{
+  "description": "Deterministic fixture for the ChannelCheevos Humble key ingestion contract.",
+  "endpoint": "https://channelcheevos.local/api/imports/humble/keys",
+  "request": {
+    "method": "POST",
+    "requiredHeaders": {
+      "Authorization": "Bearer test-operator-token",
+      "Content-Type": "application/json",
+      "Idempotency-Key": "humble-69cc1c0b"
+    },
+    "body": {
+      "source": "humble",
+      "schemaVersion": 1,
+      "exportedAt": "2026-06-29T00:00:00.000Z",
+      "items": [
+        {
+          "title": "Game One",
+          "key": "AAAAA-BBBBB-CCCCC",
+          "platform": "steam",
+          "bundle": null,
+          "sourceUrl": "https://www.humblebundle.com/home/keys",
+          "observedAt": "2026-06-29T00:00:00.000Z",
+          "idempotencyKey": "humble:steam:AAAAA-BBBBB-CCCCC"
+        }
+      ]
+    }
+  },
+  "response": {
+    "statusCode": 202,
+    "body": {
+      "status": "accepted",
+      "importId": "humble-fixture-000001",
+      "accepted": 1,
+      "duplicates": 0,
+      "rejected": []
+    }
+  }
+}

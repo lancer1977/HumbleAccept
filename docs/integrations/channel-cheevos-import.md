@@ -132,3 +132,16 @@ The adapter should return `202 Accepted` for queued imports and `200 OK` for syn
 ## Extension Wiring Notes
 
 HumbleAccept should map its current `apiEndpoint` option to the full adapter URL and its `apiKey` option to the bearer token. The publisher should send only normalized batches, never raw DOM rows.
+
+## Acceptance Fixture
+
+`docs/integrations/channel-cheevos-ingest-fixture.json` is the repo-owned stand-in for the downstream ChannelCheevos ingestion boundary until a live operator endpoint is configured. It captures the exact endpoint, headers, normalized batch body, and accepted response that the extension must handle.
+
+The fixture is intentionally deterministic:
+
+- one malformed row is rejected locally and never sent,
+- duplicate rows collapse to one `idempotencyKey`,
+- the request uses the adapter URL with bearer auth and the stable batch idempotency key,
+- the accepted `202` response is persisted as a delivered queue entry.
+
+`scripts/validate.sh` exercises this fixture directly. A passing validation run proves no-copy/paste extension delivery against the documented downstream contract; live ChannelCheevos proof can replace the fixture by pointing the same `apiEndpoint`/token settings at a configured operator endpoint.
