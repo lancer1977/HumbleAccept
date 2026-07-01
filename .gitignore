@@ -36,3 +36,4 @@ node_modules/
 # OS cruft
 .DS_Store
 Thumbs.db
+.devstudio/runtime/

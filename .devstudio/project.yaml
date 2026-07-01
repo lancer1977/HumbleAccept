@@ -1,12 +1,19 @@
-name: change-me
-repo_root: change-me
+name: HumbleAccept
+repo_root: /mnt/data/lancer1977/code/HumbleAccept
 
-languages: []
-frameworks: []
+languages:
+  - javascript
+  - html
+  - css
+frameworks:
+  - node
+  - browser-extension
 
 ci:
-  build: []
-  test: []
+  build:
+    - bash scripts/validate.sh
+  test:
+    - bash scripts/validate.sh
 
 devstudio:
   runtime_model: three-agent

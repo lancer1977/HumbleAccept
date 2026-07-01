@@ -145,4 +145,12 @@ Promise.all([
 });
 NODE
 
+node tests/steam-content-smoke-test.mjs
+node tests/steam-duplicate-smoke-test.mjs
+node tests/steam-rate-limit-smoke-test.mjs
+
+if command -v devstudio >/dev/null 2>&1; then
+  devstudio validate --repo "$ROOT"
+fi
+
 echo "Validation passed."
